@@ -4,29 +4,20 @@ import Heuristic.gridFunctions;
 
 public class App {
 	
-	/**
-	 * filename is the file name given to the command line
-	 * randState is the search
-	 * mode if mode is true then generate a seed if its false then we take in a file
-	 * weight is used for the weighted A*
-	 * sType is the type of search
-	 * heurs is the multiple heuristics
-	 * weight2 used in many heuristics
-	 * @param args
-	 */
+	private static String fileName;
+	private static int defaultSeed = 9;
+	private static boolean noFileGiven = true;
+	private static int heuristicValue;
+	private static double SeqAStarWeight;
+	private static int[] multipleHeuristicValues;
+	private static int searchType;
+	private static double AStarWeight;
+	private static Heuristic.gridFunctions grid;
 
-	public static void main(String[] args) {
-		String filename = "none";
-		int randState = 81;
-		boolean mode = true;
-		int heuristic = 0;
-		double weight = 1.0;
-		int sType = 0;
-		int[] heurs = {1,2,3};
-		double weight2 = 1.0;
+	public static void main(String[] args) {	
 		
 		
-		
+		//TODO fix up receiving inputs
 		for(int i = 0; i < args.length; i++) {
 			
 			//if valid input is not given
@@ -37,81 +28,76 @@ public class App {
 			//cases
 			switch(args[i]) {
 			
-			case "file":
-				filename = args[i+1];
-				mode = false;
+			case "File":
+				fileName = args[i+1];
+				noFileGiven = false;
 				break;
 				
-			case "gen":
+			case "Generation":
 				if(!args[i+1].equals("none")) {
-					randState = Integer.parseInt(args[i+1]);
+					defaultSeed = Integer.parseInt(args[i+1]);
 				}
 				break;
 			
-			case "heur":
+			case "HeuristicValue":
 				if(Integer.parseInt(args[i+1]) <=5 && Integer.parseInt(args[i+1]) >=0) {
-					heuristic = Integer.parseInt(args[i+1]);
+					heuristicValue = Integer.parseInt(args[i+1]);
 				}
 				break;
 				
-			case "weight":
+			case "AStarWeight":
 				if(Double.parseDouble(args[i+1]) >= 0) {
-					weight = Double.parseDouble(args[i+1]);
+					AStarWeight = Double.parseDouble(args[i+1]);
 				}
 				break;
 				
-			case "type":
+			case "typeOfSearch":
 				String s = args[i+1];
-				if(s.equals("seq")) {
-					sType = 1;
+				if(s.equals("Seq")) {
+					searchType = 1;
 					break;
 				}
-				else if(s.equals("int")) {
-					sType = 2;
+				else if(s.equals("Int")) {
+					searchType = 2;
 					break;
 				}
 				
-			case "heurs":
+			case "multipleHeuristics":
 				//To do
 			
-			case "weight2":
+			case "SeqAStarWeight":
 				if(Double.parseDouble(args[i+1]) >= 0) {
-					weight2 = Double.parseDouble(args[i+1]);
+					SeqAStarWeight = Double.parseDouble(args[i+1]);
 					break;
 				}
-				
-			
 			}
-			
 		}
 		
-		//test to check for arguments going through properly
-		System.out.println(filename + " " + randState + " " + mode + " " + heuristic+ " " + weight + " "
-		+ sType + " " + heurs + " " + weight2);
-		
-		//run the program for search
-		Heuristic.gridFunctions grid = new Heuristic.gridFunctions(120, 160, randState);
-		if(!filename.equals("none")) {
-			grid.traverseFile(filename);
-			grid.printGrid();
-			gridUI.path = Heuristic.aStar.aStarSearch(1, 5);
-			gridUI.main(args);
+		grid = new Heuristic.gridFunctions(120, 160, defaultSeed);
+		if(noFileGiven) {
+			randomlyGenerateGrid();
+			visualizeGridUI();
 		} else {
-			grid.hardTraverse(0);
-			grid.blockCells();
-			grid.startGoalCells();
-			grid.highwayCells();
-			grid.printGrid();
-			gridUI.path = Heuristic.aStar.aStarSearch(0.25, 2);
-			int h[] = new int[3];
-			h[1] = 3;
-			h[0] = 1;
-			h[2] = 2;
-			//gridUI.path = Heuristic.aStar.seqASS(1.0, 1.0, h);
-			gridUI.main(args);
+			makeGridFromFile();
+			visualizeGridUI();
 		}
-		
-		
+	}
+	
+	public static void makeGridFromFile() {
+		grid.traverseFile(fileName);
+	}
+	
+	public static void randomlyGenerateGrid() {
+		grid.hardTraverse(0);
+		grid.blockCells();
+		grid.startGoalCells();
+		grid.highwayCells();
+	}
+	
+	public static void visualizeGridUI() {
+		grid.printGrid();
+		gridUI.path = Heuristic.aStar.aStarSearch(0.25, 2);
+		gridUI.main(null);
 	}
 
 }

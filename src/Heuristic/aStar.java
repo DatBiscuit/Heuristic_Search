@@ -139,7 +139,6 @@ public class aStar {
 		}
 		
 		for(int i = 0; i < h.length; i++) {
-			//hgrid[i] = computeHeuristics(hgrid[i], h[i], grid[g], w1);
 			test = i;
 			PriorityQueue<Tile> toAdd = new PriorityQueue<Tile>(10000, TileComparator2);
 			fringe.add(toAdd);
@@ -160,7 +159,6 @@ public class aStar {
 		Tile minKeyI;
 		
 		while(!fringe.get(0).isEmpty()) {
-			//System.out.println(fringe.get(0).size());
 			test = 0;
 			minKey = fringe.get(0).peek();
 			while(expanded.get(0).contains(minKey)) {

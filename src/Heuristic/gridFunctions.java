@@ -15,10 +15,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
 
+import javafx.scene.paint.Color;
+
 public class gridFunctions implements Serializable {
 	
 	//variables for grid
-	//public String grid[];
 	private int counter;
 	public Random seed;
 	public int x;
@@ -34,34 +35,47 @@ public class gridFunctions implements Serializable {
 	public static int goal;
 	public static int start;
 	
+	
+	/**
+	 * Retrieves the grid that has been seeded
+	 * @return grid
+	 */
 	public static Tile[] getGrid() {
 		return grid;
 	}
 	
-	//constructor for vector where each block is located
-	//x is rows, y is col
+	/**
+	 * Constructor to make a vector indicating where each block is located
+	 * x = rows
+	 * y = columns
+	 * @param xPos
+	 * @param yPos
+	 */
 	public gridFunctions(int xPos, int yPos) {
 		x = xPos;
 		y = yPos;
 	}
-	
-	//constructor for the tiles on the grid
+
+	/**
+	 * Constructor for creating each tile on the grid
+	 * @author Jennifer Borucki
+	 *
+	 */
 	public static class Tile implements Serializable{
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 		public gridFunctions pos;
 		public String type;
+		public String cellColor;
 		public int parent;
 		public int[] parents = new int[6];
 		public double distance;
 		public double[] distances = new double[6];
 		
-		Tile(int x, int y, String t) {
+		Tile(int x, int y, String t, String r) {
 			gridFunctions position = new gridFunctions(x, y);
 			pos = position;
 			type = t;
+			cellColor = r;
 		}
 	}
 	
@@ -72,6 +86,8 @@ public class gridFunctions implements Serializable {
 	
 	/**
 	 * Constructor used for initializing the grid
+	 * The grid is set up to be one dimensional array 
+	 * Calculations for getting specific rows and columns has been implemented
 	 * @param rows
 	 * @param cols
 	 * @param randS
@@ -93,25 +109,20 @@ public class gridFunctions implements Serializable {
 		
 		for(int i = 0; i < ROW; i ++) {
 			for(int j = 0; j < COL; j++) {
-				Tile t = new Tile(i, j, "1");
+				Tile t = new Tile(i, j, "1", "WHITE");
 				grid[i*160 + j] = t;
 				counter++;
 			}
 		}
 		System.out.println(counter);
 		
-		
-		
-		//grid = new String[rows*cols];
-		
-		//intialize all cells as unblocked
-		/*
-		for(int i=0; i<grid.length; i++) {
-			grid[i] = "1";
-		}
-		*/
 	}
 	
+	/**
+	 * Traverse the file in order to set up the grid
+	 * @param f
+	 * Parameter is the file we are traversing
+	 */
 	public void traverseFile(String f) {
 		counter = 0;
 		try (Stream<String> stream = Files.lines(Paths.get(f))) {
@@ -126,6 +137,14 @@ public class gridFunctions implements Serializable {
 		return;
 	}
 	
+	
+	/**
+	 * Adding the respective cell in the grid based on the file given
+	 * @param s
+	 * The type of cell it should be corresponding to the file
+	 * @param r
+	 * The number of what "cell" we are looking at in the file
+	 */
 	public void addText(String s, int r) {
 		for(int i = 0; i < s.length(); i++) {
 			grid[counter*160 + i].type = Character.toString(s.charAt(i));
@@ -163,7 +182,9 @@ public class gridFunctions implements Serializable {
 	}
 	
 	/**
-	 * creates the start and goal cells
+	 * creates the start and goal cells on the grid
+	 * Goal is blue
+	 * Start is Red
 	 */
 	public void startGoalCells() {
 		boolean startPlaced = false;
@@ -184,6 +205,7 @@ public class gridFunctions implements Serializable {
 			
 			if(!grid[r*160 + c].type.equals("0")) {
 				grid[r*160 + c].type = "s";
+				grid[r*160 + c].cellColor = "RED";
 				start = r*160+c;
 				startPlaced = true;
 			}
@@ -201,13 +223,14 @@ public class gridFunctions implements Serializable {
 			
 			if(!grid[r*160 + c].type.equals("0")) {
 				grid[r*160 + c].type = "g";
+				grid[r*160 + c].cellColor = "BLUE";
 				goal = r*160+c;
 				goalPlaced = true;
 			}
 		}
 	}
 	
-	/*
+	/**
 	 * Adds blocked cells to grid
 	 * 20% of the grids cells are blocked
 	 * These are the black cells
@@ -222,6 +245,7 @@ public class gridFunctions implements Serializable {
 			
 			if(!grid[r*160 + c].type.equals("a")) {
 				grid[r*160 + c].type = "0";
+				grid[r*160 + c].cellColor = "BLACK";
 				i++;
 			}
 		}
@@ -249,7 +273,7 @@ public class gridFunctions implements Serializable {
 			while(1 == 1) {
 				row = r.nextInt(ROW);
 				col = c.nextInt(COL);
-				Tile t = new Tile(row, col, "2");
+				Tile t = new Tile(row, col, "2", "GREY");
 				if(!ht.contains(t)) {
 					ht.add(t);
 					i++;
@@ -268,6 +292,7 @@ public class gridFunctions implements Serializable {
 						
 						int cell = getPositionOnGrid(new gridFunctions(x, y));
 						this.grid[cell].type = "2";
+						this.grid[cell].cellColor = "GREY";
 						
 					}
 				}
@@ -279,6 +304,9 @@ public class gridFunctions implements Serializable {
 		//return ht;
 	}
 	
+	/**
+	 * Serialize the grid to be used later when that seed gets called again
+	 */
 	public void storeGrid()  {
 		try {
 			URL url = getClass().getResource("grid.ser");
@@ -294,6 +322,9 @@ public class gridFunctions implements Serializable {
 		}
 	}
 	
+	/**
+	 * Reset the grid 
+	 */
 	public void resetGrid() {
 		try {
 			URL url = getClass().getResource("grid.ser");
@@ -310,6 +341,9 @@ public class gridFunctions implements Serializable {
 		}
 	}
 	
+	/**
+	 * Create the highway cells on the grid
+	 */
 	public void highwayCells() {
 		storeGrid();
 		int highwayNum = 4;
@@ -341,8 +375,10 @@ public class gridFunctions implements Serializable {
 					if(cells[i][j] == 1) {
 						if(grid[i*160 + j].type.equals("2")) {
 							grid[i*160 + j].type = "b";
+							grid[i*160 + j].cellColor = "GREEN";
 						} else {
 							grid[i*160 + j].type = "a";
+							grid[i*160 + j].cellColor = "GREEN";
 						}
 					}
 				}
@@ -400,6 +436,11 @@ public class gridFunctions implements Serializable {
 		return highway;
 	}
 	
+	/**
+	 * Conflict with the highway generation
+	 * @param highway
+	 * @return
+	 */
 	public boolean conflict(int[][] highway) {
 		if(grid[lastIndex[0]*160 + lastIndex[1]].type.equals("a") 
 				|| grid[lastIndex[0]*160 + lastIndex[1]].type.equals("g") 
@@ -414,6 +455,13 @@ public class gridFunctions implements Serializable {
 		}
 	}
 	
+	/**
+	 * If we have hit a border cell
+	 * @return
+	 * True
+	 * else 
+	 * False
+	 */
 	public boolean border() {
 		if(lastIndex[1] == 0) {
 			return true;
@@ -453,15 +501,6 @@ public class gridFunctions implements Serializable {
 					}
 					highway[lastIndex[0]][lastIndex[1]] = 1;
 					cellCount++;
-				/*if(side) {
-					lastIndex[1] += 1;
-					this.lastDirection = "c";
-				}
-				else {
-					lastIndex[0] += 1; 
-					this.lastDirection = "r";
-				}
-				*/
 				
 				} catch(IndexOutOfBoundsException e) {
 					this.end = true;
